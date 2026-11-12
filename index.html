@@ -1,0 +1,304 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Capacitaciones - API REST</title>
+
+    <!-- ESTILOS CSS -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+        }
+
+        header {
+            background-color: #39A900;
+            color: white;
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        header h1 {
+            margin-bottom: 10px;
+        }
+
+        main {
+            width: 90%;
+            max-width: 1100px;
+            margin: 30px auto;
+        }
+
+        .acciones {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        button {
+            background-color: #39A900;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #2d8500;
+        }
+
+        #mensaje {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        #contenedor-capacitaciones {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .capacitacion {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+            border-top: 5px solid #39A900;
+        }
+
+        .capacitacion h2 {
+            color: #278000;
+            margin: 12px 0;
+            font-size: 20px;
+        }
+
+        .capacitacion p {
+            line-height: 1.6;
+        }
+
+        .id {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .error {
+            color: #c62828;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ENCABEZADO -->
+    <header>
+        <h1>Capacitaciones disponibles</h1>
+        <p>Consulta de información mediante API REST</p>
+    </header>
+
+    <!-- CONTENIDO -->
+    <main>
+
+        <div class="acciones">
+            <button onclick="obtenerCapacitaciones()">
+                Consultar capacitaciones
+            </button>
+        </div>
+
+        <p id="mensaje">
+            Presiona el botón para consultar las capacitaciones.
+        </p>
+
+        <section id="contenedor-capacitaciones">
+        </section>
+
+    </main>
+
+    <footer>
+        Consumo de API REST con HTML, CSS y JavaScript
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script>
+
+        // ==========================================
+        // 1. CONFIGURACIÓN DE LA API
+        // ==========================================
+
+        const URL_API =
+            "https://favqrpptwemspjwuhquj.supabase.co/rest/v1/capacitaciones?select=*";
+
+        const API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhdnFycHB0d2Vtc3Bqd3VocXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ0ODczNjEsImV4cCI6MjExMDA2MzM2MX0.xnReiMLaQsWzkB5zPx3VSgiaMgW7mRnNzDNa2-WjLfc";
+
+        const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZhdnFycHB0d2Vtc3Bqd3VocXVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ0ODczNjEsImV4cCI6MjExMDA2MzM2MX0.xnReiMLaQsWzkB5zPx3VSgiaMgW7mRnNzDNa2-WjLfc";
+
+
+        // ==========================================
+        // 2. FUNCIÓN FETCH PARA CONSULTAR LA API
+        // ==========================================
+
+        async function obtenerCapacitaciones() {
+
+            const mensaje =
+                document.getElementById("mensaje");
+
+            const contenedor =
+                document.getElementById(
+                    "contenedor-capacitaciones"
+                );
+
+            mensaje.textContent =
+                "Consultando capacitaciones...";
+
+            contenedor.innerHTML = "";
+
+            try {
+
+                // Realizar petición GET
+                const respuesta = await fetch(URL_API, {
+
+                    method: "GET",
+
+                    headers: {
+                        "Accept": "application/json",
+
+                        // API KEY
+                        "apikey": API_KEY,
+
+                        // AUTORIZACIÓN
+                        "Authorization": `Bearer ${TOKEN}`
+                    }
+
+                });
+
+
+                // ==================================
+                // 3. VALIDAR RESPUESTA HTTP
+                // ==================================
+
+                if (!respuesta.ok) {
+
+                    throw new Error(
+                        "Error HTTP: " + respuesta.status
+                    );
+
+                }
+
+
+                // ==================================
+                // 4. CONVERTIR RESPUESTA A JSON
+                // ==================================
+
+                const datos = await respuesta.json();
+
+                console.log(
+                    "Datos recibidos de la API:",
+                    datos
+                );
+
+
+                // Soporta un arreglo directo o
+                // una respuesta con propiedad data.
+
+                const capacitaciones =
+                    Array.isArray(datos)
+                        ? datos
+                        : datos.data;
+
+
+                // ==================================
+                // 5. MOSTRAR CAPACITACIONES
+                // ==================================
+
+                if (!Array.isArray(capacitaciones)) {
+                    throw new Error(
+                        "Formato de respuesta no válido"
+                    );
+                }
+
+                if (capacitaciones.length === 0) {
+
+                    mensaje.textContent =
+                        "No hay capacitaciones disponibles.";
+
+                    return;
+                }
+
+                mensaje.textContent =
+                    "Capacitaciones encontradas: " +
+                    capacitaciones.length;
+
+
+                capacitaciones.forEach(capacitacion => {
+
+                    // Crear tarjeta
+                    const tarjeta =
+                        document.createElement("article");
+
+                    tarjeta.className = "capacitacion";
+
+                    // Crear campos de forma segura
+                    const id = document.createElement("p");
+                    id.className = "id";
+                    id.textContent =
+                        "ID: " + capacitacion.id;
+
+                    const titulo =
+                        document.createElement("h2");
+                    titulo.textContent =
+                        capacitacion.titulo ?? "Sin título";
+
+                    const descripcion =
+                        document.createElement("p");
+                    descripcion.textContent =
+                        capacitacion.descripcion ??
+                        "Sin descripción";
+
+                    // Agregar campos a la tarjeta
+                    tarjeta.appendChild(id);
+                    tarjeta.appendChild(titulo);
+                    tarjeta.appendChild(descripcion);
+
+                    // Agregar tarjeta al contenedor
+                    contenedor.appendChild(tarjeta);
+
+                });
+
+
+            } catch (error) {
+
+                console.error(
+                    "Error al consumir la API:",
+                    error
+                );
+
+                mensaje.textContent =
+                    "No fue posible consultar las capacitaciones. " +
+                    error.message;
+
+                mensaje.className = "error";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+</html>
